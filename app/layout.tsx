@@ -2,6 +2,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import "./globals.css";
+import  ConvexClientProvider from "@/components/ConvexClientProvider";
 
 export const metadata: Metadata = {
   title: "Ella AI - Your Intelligent AI Assistant",
@@ -48,7 +49,9 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <ConvexClientProvider>
            {children}
+            </ConvexClientProvider>
           </ThemeProvider>
         </body>
       </html>

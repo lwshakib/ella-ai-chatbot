@@ -11,9 +11,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useMutation } from "convex/react"
+import { api } from "@/convex/_generated/api"
 
 export function ModeToggle() {
   const { setTheme } = useTheme()
+  const getOrCreateUser = useMutation(api.functions.getOrCreateUser);
+
+
+  React.useEffect(() => {
+    
+  }, [])
 
   return (
     <DropdownMenu>
