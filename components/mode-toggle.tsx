@@ -20,7 +20,7 @@ export function ModeToggle() {
 
 
   React.useEffect(() => {
-    
+    getOrCreateUser()
   }, [])
 
   return (

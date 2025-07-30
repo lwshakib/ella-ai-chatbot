@@ -39,19 +39,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-interface Conversation {
-  id: string;
-  name: string;
-  clerkId: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export function NavConversation() {
   const { isMobile } = useSidebar();
+  const conversations = useQuery(api.functions.getConversations);
   const [conversationToDelete, setConversationToDelete] =
-    useState<Conversation | null>(null);
+    useState< any | null>(null);
 
 
 
@@ -95,12 +91,12 @@ export function NavConversation() {
         <SidebarGroupLabel>Conversations</SidebarGroupLabel>
         <div className="relative flex-1 min-h-0">
           <SidebarMenu>
-            {/* {conversations.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((conversation: Conversation) => (
-              <SidebarMenuItem key={conversation.id}>
+            {conversations && conversations?.map((conversation: any) => (
+              <SidebarMenuItem key={conversation._id}>
                 <SidebarMenuButton asChild>
-                  <Link href={`/c/${conversation.id}`}>
+                  <Link href={`/c/${conversation._id}`}>
                     <MessageSquare />
-                    <span>{conversation.name}</span>
+                    <span>{conversation.title}</span>
                   </Link>
                 </SidebarMenuButton>
                 <DropdownMenu>
@@ -125,7 +121,6 @@ export function NavConversation() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => handleDeleteConversation(conversation)}
                       className="text-destructive focus:text-destructive"
                     >
                       <Trash2 className="text-muted-foreground" />
@@ -134,7 +129,7 @@ export function NavConversation() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </SidebarMenuItem>
-            ))} */}
+            ))}
          
           </SidebarMenu>
         </div>
@@ -148,7 +143,7 @@ export function NavConversation() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{conversationToDelete?.name}"?
+              Are you sure you want to delete "{conversationToDelete?.title}"?
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
