@@ -55,11 +55,10 @@ export default function Home() {
   const handleMessageSubmission = async (message: string) => {
     const conversationId = await createConversation();
     router.push(`/c/${conversationId}`);
-    const response = await axios.post("/api/chat", {
+    axios.post("/api/chat", {
       message,
       conversationId,
     });
-    console.log(response.data);
   };
 
   // Voice input handler
