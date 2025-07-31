@@ -4,16 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { useMutation, useQuery } from "convex/react";
-import {
-  Copy,
-  Download,
-  Globe,
-  Link,
-  Loader2,
-  Mic,
-  Search,
-  Send,
-} from "lucide-react";
+import { Copy, Download, Globe, Link, Loader2, Mic, Send } from "lucide-react";
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -461,6 +452,8 @@ export default function ConversationPage() {
           throw new Error("User not authenticated");
         }
 
+        const { tool, message: textMessage } = identifyTool(message);
+
         createMessage({
           conversationId: params.id as any,
           text: message,
@@ -470,7 +463,6 @@ export default function ConversationPage() {
           clerkId: user.id,
         });
 
-        const { tool, message: textMessage } = identifyTool(message);
         const AIMessageId = await createMessage({
           conversationId: params?.id as any,
           text: "",
@@ -612,9 +604,11 @@ export default function ConversationPage() {
 
                     <div
                       className={`max-w-[80%] px-4 py-3 rounded-2xl ${
-                        message.sender === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground"
+                        message.status === "failed"
+                          ? "bg-red-100 text-red-700 border border-red-400 relative"
+                          : message.sender === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "text-foreground"
                       }`}
                     >
                       {/* Copy button for assistant messages - bottom left */}
@@ -673,12 +667,8 @@ export default function ConversationPage() {
                             )}
                           </div>
                         )}
-                      {/* 
-                    <p className="text-xs opacity-70 mt-1">
-                      {formatDistanceToNow(new Date(message.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </p> */}
+
+                      {/* Failed message label */}
                     </div>
                   </div>
                 )}

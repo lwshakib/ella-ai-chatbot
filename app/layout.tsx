@@ -3,6 +3,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import "./globals.css";
 import  ConvexClientProvider from "@/components/ConvexClientProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Ella AI - Your Intelligent AI Assistant",
@@ -51,6 +52,7 @@ export default async function RootLayout({
           >
             <ConvexClientProvider>
            {children}
+           <Toaster />
             </ConvexClientProvider>
           </ThemeProvider>
         </body>

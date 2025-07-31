@@ -22,9 +22,11 @@ export const generateAIResponse = inngest.createFunction(
   { id: "generate-ai-response" },
   { event: "chat/generate-ai-response" },
   async ({ event, step }) => {
-    const { message, conversationId, clerkId, tool, AIMessageId } = event.data;
+    const { message, conversationId, clerkId, tool, AIMessageId } =
+      event.data;
 
     const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
 
     const previousMessages = await step.run(
       "get-previous-messages",
@@ -53,7 +55,10 @@ export const generateAIResponse = inngest.createFunction(
           });
           const results = webResponse.results;
           const images = webResponse.images;
-          const resources = results.map((result: any) => ({ url: result.url, favicon: result?.favicon as string }));
+          const resources = results.map((result: any) => ({
+            url: result.url,
+            favicon: result?.favicon as string,
+          }));
           const answer = webResponse.answer;
 
           const contents = webResponse.results.map(
@@ -181,5 +186,3 @@ export const generateAIResponse = inngest.createFunction(
     }
   }
 );
-
-
