@@ -1,11 +1,12 @@
 "use client";
 import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
 import { useMutation } from "convex/react";
 import { Mic, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import axios from "axios";
 
 export default function Home() {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function Home() {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
   const createConversation = useMutation(api.functions.createConversation);
+  const createMessage = useMutation(api.functions.createMessage);
+  const { user } = useUser();
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -27,6 +30,13 @@ export default function Home() {
       textarea.style.height = `${newHeight}px`;
     }
   }, [textValue]);
+
+  // Focus the textarea on mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextValue(e.target.value);
@@ -52,12 +62,47 @@ export default function Home() {
     }
   };
 
+  const identifyTool = (message: string) => {
+    const webTool = message.startsWith("/web");
+    const imageTool = message.startsWith("/image");
+    let toolRemovedMessage: string;
+
+    if (webTool) {
+      toolRemovedMessage = message.trim().slice(4);
+      return { tool: "web", message: toolRemovedMessage };
+    }
+    if (imageTool) {
+      toolRemovedMessage = message.trim().slice(6);
+      return { tool: "image", message: toolRemovedMessage };
+    }
+    return { tool: "text", message };
+  };
+
   const handleMessageSubmission = async (message: string) => {
     const conversationId = await createConversation();
     router.push(`/c/${conversationId}`);
-    axios.post("/api/chat", {
-      message,
+    createMessage({
+      text: message,
+      clerkId: user?.id as string,
+      type: "text",
+      conversationId: conversationId,
+      sender: "user",
+      status: "completed",
+    });
+    const { tool, message: textMessage } = identifyTool(message);
+    const AIMessageId = await createMessage({
       conversationId,
+      text: "",
+      type: tool,
+      sender: "ella",
+      status: "pending",
+      clerkId: user?.id as string,
+    });
+    axios.post("/api/chat", {
+      message: textMessage,
+      conversationId,
+      tool,
+      AIMessageId,
     });
   };
 

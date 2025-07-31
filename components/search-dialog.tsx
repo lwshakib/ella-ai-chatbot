@@ -7,15 +7,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { api } from "@/convex/_generated/api";
 import { useAIStore } from "@/lib/zustand";
+import { useMutation } from "convex/react";
+import { formatDistanceToNow } from "date-fns";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface SearchResult {
-  id: string;
-  name: string;
-  content: string;
+  _id: string;
+  title: string;
+  updatedAt: string;
+  // Add other fields if needed
 }
 
 export function SearchDialog() {
@@ -24,6 +28,7 @@ export function SearchDialog() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
+  const searchConversation = useMutation(api.functions.searchConversation);
 
   const handleClose = () => {
     closeSearchDialog();
@@ -39,16 +44,10 @@ export function SearchDialog() {
 
     setIsSearching(true);
     try {
-      // This would be replaced with your actual search API endpoint
-      const response = await fetch(
-        `/api/search?q=${encodeURIComponent(query)}`
-      );
-      if (response.ok) {
-        const results = await response.json();
-        setSearchResults(results);
-      } else {
-        setSearchResults([]);
-      }
+      const results = await searchConversation({
+        searchTerm: query,
+      });
+      setSearchResults(results); // <-- Show results in UI
     } catch (error) {
       console.error("Search error:", error);
       setSearchResults([]);
@@ -74,7 +73,7 @@ export function SearchDialog() {
   const handleResultClick = (result: SearchResult) => {
     console.log(result);
     handleClose();
-    router.push(`/c/${result.id}`);
+    router.push(`/c/${result._id}`);
   };
 
   return (
@@ -109,13 +108,15 @@ export function SearchDialog() {
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {searchResults.map((result) => (
                 <div
-                  key={result.id}
+                  key={result._id}
                   className="p-3 border rounded-lg hover:bg-muted cursor-pointer transition-colors"
                   onClick={() => handleResultClick(result)}
                 >
-                  <div className="font-medium text-sm">{result.name}</div>
+                  <div className="font-medium text-sm">{result.title}</div>
                   <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {result.content}
+                    {formatDistanceToNow(new Date(result.updatedAt), {
+                      addSuffix: true,
+                    })}
                   </div>
                 </div>
               ))}

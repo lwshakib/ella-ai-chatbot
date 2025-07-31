@@ -9,7 +9,7 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider suppressHydrationWarning>
       <AppSidebar />
       <main className="relative h-screen w-full flex flex-col">
         {/* Sticky top bar for ModeToggle and SidebarTrigger */}

@@ -8,13 +8,15 @@ export async function POST(req: Request) {
             status: 401,
         });
     }
-    const { message, conversationId } = await req.json();
+    const { message, conversationId, tool, AIMessageId } = await req.json();
     await inngest.send({
         name: "chat/generate-ai-response",
         data: {
             message,
             conversationId,
             clerkId: user.id,
+            tool,
+            AIMessageId
         },
     });
     return new Response(JSON.stringify({ message }));
