@@ -658,7 +658,7 @@ export default function ConversationPage() {
                           message.status === "failed"
                             ? "bg-red-50 text-red-700 border-red-200"
                             : message.sender === "user"
-                              ? "bg-primary text-white ml-auto"
+                              ? "bg-muted text-white ml-auto"
                               : "bg-muted/50 text-foreground"
                         }`}
                       >
