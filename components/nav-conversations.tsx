@@ -173,7 +173,7 @@ export function NavConversations() {
                 <SidebarMenuItem key={conversation._id}>
                   <SidebarMenuButton
                     asChild
-                    className={isActive ? "bg-accent" : ""}
+                    className={isActive ? "" : ""}
                   >
                     <Link href={`/c/${conversation._id}`}>
                       <MessageSquare />
