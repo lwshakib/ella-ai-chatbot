@@ -664,7 +664,7 @@ export default function ConversationPage() {
                       >
                         {/* Text content for all message types */}
                         {message.text && (
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          <p className="text-sm text-black dark:text-white leading-relaxed whitespace-pre-wrap">
                             <MarkdownRenderer
                               content={message.text}
                               variant={
