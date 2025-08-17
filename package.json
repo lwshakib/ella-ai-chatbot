@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "devs": "npx concurrently \"next dev --turbopack\" \"npx convex dev\" \"npx inngest-cli@latest dev\"",
     "build": "next build",
+    "build:prod": "next build && npx convex deploy",
     "start": "next start",
     "lint": "next lint"
   },
