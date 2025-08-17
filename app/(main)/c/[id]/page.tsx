@@ -575,7 +575,7 @@ export default function ConversationPage() {
           <ConversationSkeleton />
         </div>
         <div className="sticky bottom-0 bg-background px-2 sm:px-4 py-2">
-          <AiInput increaseWidth={true} activeTool={activeTool || undefined} />
+          <AiInput increaseWidth={true} />
         </div>
       </div>
     );
@@ -792,7 +792,7 @@ export default function ConversationPage() {
       {/* Fixed input field at bottom */}
       <div className="sticky bottom-0 bg-background px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <AiInput increaseWidth={true} activeTool={activeTool || undefined} />
+          <AiInput increaseWidth={true} />
         </div>
       </div>
     </div>

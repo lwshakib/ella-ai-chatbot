@@ -86,8 +86,8 @@ export function NavConversations() {
   const [conversationToDelete, setConversationToDelete] = useState<any | null>(
     null
   );
-  const [generatingTitleFor, setGeneratingTitleFor] = useState<string | null>(
-    null
+  const [generatingTitleFor, setGeneratingTitleFor] = useState<Set<string>>(
+    new Set()
   );
   const { user } = useUser();
   const previousMessages = useMutation(api.functions.getPreviousMessages);
@@ -112,7 +112,7 @@ export function NavConversations() {
 
   const generateTitle = async (conversationId: string) => {
     try {
-      setGeneratingTitleFor(conversationId);
+      setGeneratingTitleFor((prev) => new Set(prev).add(conversationId));
 
       const messages = await previousMessages({
         clerkId: user?.id as string,
@@ -152,7 +152,11 @@ export function NavConversations() {
     } catch (error) {
       console.error("Failed to generate title:", error);
     } finally {
-      setGeneratingTitleFor(null);
+      setGeneratingTitleFor((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(conversationId);
+        return newSet;
+      });
     }
   };
 
@@ -177,7 +181,7 @@ export function NavConversations() {
                   >
                     <Link href={`/c/${conversation._id}`}>
                       <MessageSquare />
-                      {generatingTitleFor === conversation._id ? (
+                      {generatingTitleFor.has(conversation._id) ? (
                         <Skeleton className="h-4 w-32" />
                       ) : (
                         <span>{conversation.title}</span>
