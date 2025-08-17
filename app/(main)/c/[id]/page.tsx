@@ -313,6 +313,13 @@ export default function ConversationPage() {
   const createMessage = useMutation(api.functions.createMessage);
   const hasProcessedParams = useRef(false);
 
+  // Function to scroll to bottom
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior });
+    }
+  }, []);
+
   // Toggle resources expanded state
   const toggleResources = (messageId: string) => {
     setExpandedResources((prev) => {
@@ -374,8 +381,29 @@ export default function ConversationPage() {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (messages && messages.length > 0) {
+      // Use a small delay to ensure DOM is updated
+      const timer = setTimeout(() => {
+        scrollToBottom("smooth");
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages, scrollToBottom]);
+
+  // Also scroll to bottom when messages array length changes
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      const timer = setTimeout(() => {
+        scrollToBottom("smooth");
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages?.length, scrollToBottom]);
+
+  // Scroll to bottom immediately when component mounts
+  useEffect(() => {
+    scrollToBottom("auto");
+  }, [scrollToBottom]);
 
   // Handle text input changes
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -433,6 +461,10 @@ export default function ConversationPage() {
       status: "completed",
       clerkId: user?.id as string,
     });
+
+    // Scroll to bottom immediately after user message
+    setTimeout(() => scrollToBottom("smooth"), 50);
+
     const AIMessageId = await createMessage({
       conversationId: params?.id as any,
       text: "",
@@ -441,6 +473,10 @@ export default function ConversationPage() {
       status: "pending",
       clerkId: user?.id as string,
     });
+
+    // Scroll to bottom after AI message placeholder is created
+    setTimeout(() => scrollToBottom("smooth"), 50);
+
     axios.post("/api/chat", {
       message: message,
       conversationId: params.id,
@@ -480,6 +516,9 @@ export default function ConversationPage() {
           clerkId: user.id,
         });
 
+        // Scroll to bottom after user message
+        setTimeout(() => scrollToBottom("smooth"), 50);
+
         const AIMessageId = await createMessage({
           conversationId: params?.id as any,
           text: "",
@@ -488,6 +527,9 @@ export default function ConversationPage() {
           status: "pending",
           clerkId: user?.id as string,
         });
+
+        // Scroll to bottom after AI message placeholder
+        setTimeout(() => scrollToBottom("smooth"), 50);
         axios.post("/api/chat", {
           message: textMessage,
           conversationId: params.id,
@@ -514,8 +556,11 @@ export default function ConversationPage() {
       handleSubmission(messageParam, toolParam as string);
       const newUrl = `/c/${params.id}`;
       router.replace(newUrl);
+
+      // Scroll to bottom after processing URL parameters
+      setTimeout(() => scrollToBottom("smooth"), 100);
     }
-  }, [searchParams, params.id, router]);
+  }, [searchParams, params.id, router, scrollToBottom]);
 
   // Early returns after all hooks are declared
   if (conversation === null) {
@@ -665,12 +710,7 @@ export default function ConversationPage() {
                         {/* Text content for all message types */}
                         {message.text && (
                           <p className="text-sm text-black dark:text-white leading-relaxed whitespace-pre-wrap">
-                            <MarkdownRenderer
-                              content={message.text}
-                              variant={
-                                message.sender === "user" ? "user" : "default"
-                              }
-                            />
+                            <MarkdownRenderer content={message.text} />
                           </p>
                         )}
 
