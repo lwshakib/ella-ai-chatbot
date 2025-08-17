@@ -2,6 +2,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
+import Image from "next/image";
 
 function LibrarySkeleton() {
   return (
@@ -62,38 +63,42 @@ export default function LibraryPage() {
           space-y-4
         "
       >
-        {images.map((img: any) => (
-          <div key={img._id} className="relative mb-4 break-inside-avoid">
-            <img
-              src={img.imageUrl}
-              alt={img.text || "Generated image"}
-              className="w-full rounded-lg shadow-md"
-              style={{ display: "block" }}
-            />
-            <a
-              href={img.imageUrl}
-              download
-              className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-2 shadow transition"
-              title="Download image"
-            >
-              {/* Download SVG icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        {images
+          .filter((img: any) => img.imageUrl)
+          .map((img: any) => (
+            <div key={img._id} className="relative mb-4 break-inside-avoid">
+              <Image
+                src={img.imageUrl}
+                alt={img.text || "Generated image"}
+                width={400}
+                height={400}
+                className="w-full rounded-lg shadow-md"
+                style={{ display: "block" }}
+              />
+              <a
+                href={img.imageUrl}
+                download
+                className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full p-2 shadow transition"
+                title="Download image"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
-                />
-              </svg>
-            </a>
-          </div>
-        ))}
+                {/* Download SVG icon */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-gray-700"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"
+                  />
+                </svg>
+              </a>
+            </div>
+          ))}
       </div>
     </div>
   );

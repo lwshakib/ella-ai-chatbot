@@ -122,7 +122,7 @@ export default function AiInput({
     createMessage({
       conversationId: params.id as any,
       text: message,
-      type: tool,
+      type: "text",
       sender: "user",
       status: "completed",
       clerkId: user?.id as string,
