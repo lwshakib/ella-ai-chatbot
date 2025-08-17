@@ -118,6 +118,86 @@ Visit [http://localhost:3000](http://localhost:3000) to view the app.
 
 ---
 
+## Production Deployment
+
+### 1. Clerk Setup
+
+1. **Create Clerk Account and Add Billing Plan**
+
+   - Go to [clerk.com](https://clerk.com) and create an account
+   - Choose a billing plan that fits your needs
+   - Set up your application
+
+2. **Add JWT Templates**
+
+   - In your Clerk dashboard, go to JWT Templates
+   - Create custom templates if needed for your application
+
+3. **Copy Clerk Frontend URL**
+   - Get your Clerk Frontend API URL from the dashboard
+   - Add it to your environment variables as `CLERK_FRONTEND_API_URL`
+
+### 2. Convex Database Setup
+
+1. **Create Convex Database**
+
+   - Go to [convex.dev](https://convex.dev) and create an account
+   - Create a new project/database
+   - Get your deployment URL
+
+2. **Add Frontend URL on Convex**
+   - In your Convex dashboard, add your production frontend URL
+   - This allows your frontend to communicate with the database
+
+**How to go to Convex deployment:**
+
+- Search on Google: "How to deploy Convex database"
+- Follow the official Convex deployment documentation
+- Use `npx convex deploy` to deploy your functions
+
+### 3. Inngest Setup
+
+1. **Create Inngest Account**
+
+   - Go to [inngest.com](https://inngest.com) and create an account
+   - Set up your project
+
+2. **Add using Manual Deployment**
+   - Configure Inngest for manual deployment
+   - Set up your event handlers and functions
+
+**How to go to Inngest manual deployment:**
+
+- Search on Google: "How to deploy Inngest manually"
+- Follow the Inngest manual deployment guide
+- Configure your production environment variables
+
+### 4. Production Environment Variables
+
+Update your production environment with the actual keys and URLs:
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_production_clerk_key
+CLERK_SECRET_KEY=your_production_clerk_secret
+CONVEX_DEPLOYMENT=your_convex_deployment_url
+NEXT_PUBLIC_CONVEX_URL=your_convex_url
+CLERK_FRONTEND_API_URL=your_clerk_frontend_url
+NEXT_PUBLIC_GOOGLE_API_KEY=your_google_api_key
+NEXT_PUBLIC_TAVILY_API_KEY=your_tavily_api_key
+NEXT_PUBLIC_NEBIUS_API_KEY=your_nebius_api_key
+```
+
+### 5. Deploy to Production
+
+```bash
+# Build the application
+npm run build:pro
+
+
+```
+
+---
+
 ## Authentication
 
 - Uses **Clerk** for user authentication.
