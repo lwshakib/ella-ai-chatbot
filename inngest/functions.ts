@@ -6,17 +6,7 @@ import { ConvexHttpClient } from "convex/browser";
 import OpenAI from "openai";
 import { EllaSimpleAgent, imagePropertiesIdentifierAgent } from "./agent";
 import { inngest } from "./client";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY!,
-});
-
-const imageClient = new OpenAI({
-  baseURL: "https://api.studio.nebius.com/v1/",
-  apiKey: process.env.NEXT_PUBLIC_NEBIUS_API_KEY,
-});
-
-const webClient = tavily({ apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY! });
+import { ai, imageClient, webClient } from "../config"; 
 
 export const generateAIResponse = inngest.createFunction(
   { id: "generate-ai-response" },

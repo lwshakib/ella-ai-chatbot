@@ -1,3 +1,4 @@
+import { googleApiKey } from "@/config";
 import { createAgent, gemini } from "@inngest/agent-kit";
 
 export const imagePropertiesIdentifierAgent = createAgent({
@@ -60,7 +61,7 @@ You are an assistant that extracts image generation properties from user input a
 `,
   model: gemini({
     model: "gemini-2.5-flash",
-    apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+    apiKey: googleApiKey,
   }),
 });
 
@@ -91,6 +92,6 @@ Generate the **best possible answer in Markdown format** for every user query.
   `,
   model: gemini({
     model: "gemini-2.5-flash",
-    apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+    apiKey: googleApiKey,
   }),
 });

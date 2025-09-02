@@ -39,13 +39,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
-import { GoogleGenAI } from "@google/genai";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
-});
 
 function ConversationsSkeleton() {
   return (
@@ -118,32 +113,21 @@ export function NavConversations() {
         clerkId: user?.id as string,
         conversationId,
       });
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: JSON.stringify(messages),
-        config: {
-          systemInstruction: `
-          You are a title generator. Your task is to create a short, meaningful, and attention-grabbing title of 3–4 words based on the overall context and key topics of the conversation.
 
-          Guidelines:
-
-          The title must reflect the main theme or purpose of the conversation.
-
-          Keep it concise, relevant, and professional.
-
-          Avoid unnecessary words, punctuation, or filler terms.
-
-          Use title case (capitalize major words).
-
-          The title should feel like a headline, not a full sentence.
-
-          No fluff, Just The title we needed
-
-          `,
+      // Call the new API route
+      const response = await fetch("/api/generate-title", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ messages }),
       });
-      // Generate a simple title based on current timestamp
-      const newTitle = response.text as string;
+
+      if (!response.ok) {
+        throw new Error("Failed to generate title");
+      }
+
+      const { title: newTitle } = await response.json();
 
       await updateConversationTitle({
         conversationId: conversationId as any,
