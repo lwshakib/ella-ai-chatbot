@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { ai } from "@/config";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,12 +7,9 @@ export async function POST(req: NextRequest) {
     // Authenticate user
     const user = await currentUser();
     const { has } = await auth();
-    
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Parse request body
@@ -25,20 +22,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Initialize Google Generative AI
-    const genAI = new GoogleGenAI({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY!,
-    });
-    
-    if (!process.env.NEXT_PUBLIC_GOOGLE_API_KEY) {
-      return NextResponse.json(
-        { error: "Google AI API key not configured" },
-        { status: 500 }
-      );
-    }
-
     // Generate title using Gemini
-    const result = await genAI.models.generateContent({
+    const result = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: `You are a title generator. Your task is to create a short, meaningful, and attention-grabbing title of 3–4 words based on the overall context and key topics of the conversation.
 
@@ -56,23 +41,12 @@ ${JSON.stringify(messages, null, 2)}
 Generate only the title, nothing else:`,
       config: {
         temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 50,
       },
     });
 
-    const title = result.text?.trim();
-
-    if (!title) {
-      return NextResponse.json(
-        { error: "Failed to generate title" },
-        { status: 500 }
-      );
-    }
+    const title = result.text;
 
     return NextResponse.json({ title });
-
   } catch (error) {
     console.error("Error generating title:", error);
     return NextResponse.json(
