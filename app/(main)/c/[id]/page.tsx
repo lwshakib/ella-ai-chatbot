@@ -629,7 +629,7 @@ export default function ConversationPage() {
                           <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                             <button
                               onClick={() => downloadImage(message.imageUrl!)}
-                              className="w-8 h-8 rounded-full transition-colors duration-200 text-secondary-foreground flex items-center justify-center bg-background/90 backdrop-blur-sm border border-border/50 shadow-sm hover:bg-background"
+                              className="w-8 h-8 rounded-full transition-colors duration-200 text-secondary flex items-center justify-center bg-background/90 backdrop-blur-sm border border-border/50 shadow-sm hover:bg-background"
                               title="Download image"
                             >
                               <Download size={16} />
