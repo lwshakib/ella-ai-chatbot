@@ -701,7 +701,7 @@ export default function ConversationPage() {
                       <div
                         className={`px-6 py-4 rounded-2xl shadow-sm border border-border/50 ${
                           message.status === "failed"
-                            ? "bg-red-50 text-red-700 border-red-200"
+                            ? "text-red-700 border-red-200"
                             : message.sender === "user"
                               ? "bg-muted text-white ml-auto"
                               : "bg-muted/50 text-foreground"
@@ -769,7 +769,7 @@ export default function ConversationPage() {
                         <div className="absolute -bottom-8 left-2 flex space-x-2">
                           <button
                             onClick={() => copyMessage(message.text || "")}
-                            className="w-8 h-8 rounded-full transition-colors duration-200 text-secondary-foreground flex items-center justify-center hover:bg-background/50"
+                            className="w-8 h-8 rounded-full transition-colors duration-200 text-secondary flex items-center justify-center hover:bg-background/50"
                             title="Copy message"
                           >
                             <Copy size={16} />

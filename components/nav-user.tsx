@@ -53,9 +53,7 @@ export function NavUser() {
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {user.fullName}
-                  </span>
+                  <span className="truncate font-medium">{user.fullName}</span>
                   <span className="truncate text-xs">
                     {user.emailAddresses[0].emailAddress}
                   </span>
@@ -118,12 +116,14 @@ export function NavUser() {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <SignOutButton>
-                <DropdownMenuItem>
-                  <LogOut color="red" />
-                  <span className="text-destructive font-semibold">Logout</span>
-                </DropdownMenuItem>
-              </SignOutButton>
+              <DropdownMenuItem>
+                <SignOutButton>
+                  <div className="flex items-center gap-2 text-destructive">
+                    <LogOut className="size-4" />
+                    <span className="font-semibold">Logout</span>
+                  </div>
+                </SignOutButton>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
