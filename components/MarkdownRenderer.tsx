@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import MermaidChart from "./MermaidChart";
@@ -7,7 +8,7 @@ import MermaidChart from "./MermaidChart";
 interface CodeBlockProps {
   children: React.ReactNode;
   className?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 function CodeBlock({ children, className, ...props }: CodeBlockProps) {
@@ -21,15 +22,22 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy code:", err);
       setCopied(false);
     }
   }, [code]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
+
   return (
-    <div className="relative group my-6">
+    <div className="relative group my-1.5">
       {/* Header with language badge */}
       <div className="flex items-center justify-between px-4 py-2 rounded-t-lg border">
         <span className="text-xs font-medium uppercase tracking-wide">
@@ -37,9 +45,10 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
         </span>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs rounded-md border hover:opacity-70 transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
+          className="flex items-center gap-2 px-3 py-1.5 text-xs rounded-md border hover:opacity-70 transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
           type="button"
-          aria-label="Copy code to clipboard"
+          aria-label={`Copy ${language} code to clipboard`}
+          aria-pressed={copied}
         >
           {copied ? (
             <>
@@ -48,6 +57,7 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -65,6 +75,7 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -84,6 +95,8 @@ function CodeBlock({ children, className, ...props }: CodeBlockProps) {
         <pre
           {...props}
           className="text-xs font-mono p-4 overflow-x-auto scrollbar-thin"
+          role="region"
+          aria-label={`${language} code block`}
         >
           <code className="block">{code}</code>
         </pre>
@@ -97,65 +110,75 @@ interface MarkdownRendererProps {
   className?: string;
 }
 
-const markdownComponents = {
+// Memoized markdown components to prevent recreation on every render
+const createMarkdownComponents = (): Components => ({
   // Headings with better hierarchy and spacing
-  h1: ({ node, ...props }: any) => (
+  h1: ({ className, ...props }) => (
     <h1
       {...props}
-      className="text-sm lg:text-sm font-bold mt-2 mb-1 first:mt-0"
+      className={`text-sm lg:text-sm font-bold mt-1 mb-0 first:mt-0 ${className || ""}`}
     />
   ),
-  h2: ({ node, ...props }: any) => (
+  h2: ({ className, ...props }) => (
     <h2
       {...props}
-      className="text-xs lg:text-xs font-bold mt-2 mb-1"
+      className={`text-xs lg:text-xs font-bold mt-1 mb-0 ${className || ""}`}
     />
   ),
-  h3: ({ node, ...props }: any) => (
+  h3: ({ className, ...props }) => (
     <h3
       {...props}
-      className="text-xs lg:text-xs font-bold mt-2 mb-1"
+      className={`text-xs lg:text-xs font-bold mt-1 mb-0 ${className || ""}`}
     />
   ),
-  h4: ({ node, ...props }: any) => (
+  h4: ({ className, ...props }) => (
     <h4
       {...props}
-      className="text-xs lg:text-xs font-semibold mt-2 mb-1"
+      className={`text-xs lg:text-xs font-semibold mt-1 mb-0 ${className || ""}`}
     />
   ),
-  h5: ({ node, ...props }: any) => (
+  h5: ({ className, ...props }) => (
     <h5
       {...props}
-      className="text-xs font-semibold mt-1 mb-0.5"
+      className={`text-xs font-semibold mt-0.5 mb-0 ${className || ""}`}
     />
   ),
-  h6: ({ node, ...props }: any) => (
+  h6: ({ className, ...props }) => (
     <h6
       {...props}
-      className="text-xs font-semibold mt-1 mb-0.5"
+      className={`text-xs font-semibold mt-0.5 mb-0 ${className || ""}`}
     />
   ),
 
   // Enhanced paragraphs
-  p: ({ node, ...props }: any) => (
+  p: ({ className, ...props }) => (
     <p
       {...props}
-      className="text-xs lg:text-xs leading-6 mb-2"
+      className={`text-xs lg:text-xs leading-4 mb-0.5 ${className || ""}`}
     />
   ),
 
-  // Improved links with hover effects
-  a: ({ node, ...props }: any) => (
-    <a
-      {...props}
-      className="font-medium underline decoration-2 underline-offset-2 hover:opacity-70 transition-colors duration-200"
-    />
-  ),
+  // Improved links with hover effects and security
+  a: ({ href, className, ...props }) => {
+    const isExternal = href?.startsWith("http");
+    return (
+      <a
+        {...props}
+        href={href}
+        target={isExternal ? "_blank" : undefined}
+        rel={isExternal ? "noopener noreferrer" : undefined}
+        className={`font-medium underline decoration-2 underline-offset-2 hover:opacity-70 transition-colors duration-200 ${className || ""}`}
+      />
+    );
+  },
 
   // Enhanced code handling
-  code: ({ node, inline, className, children, ...props }: any) => {
+  code: ({ className, children, ...props }: any) => {
+    const codeString = String(children).replace(/\n$/, "");
+    const inline = !className || !className.startsWith("language-");
+
     if (className === "language-mermaid") {
-      return <MermaidChart chartDefinition={children as string} />;
+      return <MermaidChart chartDefinition={codeString} />;
     }
 
     if (!inline && className?.startsWith("language-")) {
@@ -170,7 +193,7 @@ const markdownComponents = {
     return (
       <code
         {...props}
-        className="px-1.5 py-0.5 rounded text-xs font-mono border mx-1"
+        className={`px-1.5 py-0.5 rounded text-xs font-mono border mx-1 ${className || ""}`}
       >
         {children}
       </code>
@@ -178,106 +201,121 @@ const markdownComponents = {
   },
 
   // Better blockquotes
-  blockquote: ({ node, ...props }: any) => (
+  blockquote: ({ className, ...props }) => (
     <blockquote
       {...props}
-      className="border-l-4 pl-3 pr-2 py-2 my-3 italic text-xs lg:text-xs rounded-r-lg leading-6"
+      className={`border-l-4 pl-3 pr-2 py-1 my-1 italic text-xs lg:text-xs rounded-r-lg leading-4 ${className || ""}`}
     />
   ),
 
   // Enhanced lists
-  ul: ({ node, ...props }: any) => (
+  ul: ({ className, ...props }) => (
     <ul
       {...props}
-      className="list-disc list-outside pl-4 space-y-1 text-xs lg:text-xs mb-2"
+      className={`list-disc list-outside pl-4 space-y-0 text-xs lg:text-xs mb-0.5 ${className || ""}`}
     />
   ),
-  ol: ({ node, ...props }: any) => (
+  ol: ({ className, ...props }) => (
     <ol
       {...props}
-      className="list-decimal list-outside pl-4 space-y-1 text-xs lg:text-xs mb-2"
+      className={`list-decimal list-outside pl-4 space-y-0 text-xs lg:text-xs mb-0.5 ${className || ""}`}
     />
   ),
-  li: ({ node, ...props }: any) => <li {...props} className="leading-6" />,
+  li: ({ className, ...props }) => (
+    <li {...props} className={`leading-4 ${className || ""}`} />
+  ),
 
   // Styled horizontal rule
-  hr: ({ node, ...props }: any) => (
+  hr: ({ className, ...props }) => (
     <hr
       {...props}
-      className="my-4 border-0 h-px opacity-30"
+      className={`my-1 border-0 h-px opacity-30 ${className || ""}`}
     />
   ),
 
   // Enhanced tables
-  table: ({ node, ...props }: any) => {
-    return (
-      <div className="overflow-x-auto my-4 rounded-lg border shadow-sm">
-        <table
-          {...props}
-          className="min-w-full divide-y"
-          style={{ tableLayout: "auto" }}
-        />
-      </div>
-    );
-  },
-  thead: ({ node, ...props }: any) => (
-    <thead {...props} />
+  table: ({ className, ...props }) => (
+    <div className="overflow-x-auto my-1 rounded-lg border shadow-sm">
+      <table
+        {...props}
+        className={`min-w-full divide-y ${className || ""}`}
+        style={{ tableLayout: "auto" }}
+        role="table"
+      />
+    </div>
   ),
-  tbody: ({ node, ...props }: any) => (
-    <tbody {...props} className="divide-y" />
+  thead: ({ className, ...props }) => (
+    <thead {...props} className={className} />
   ),
-  tr: ({ node, ...props }: any) => (
+  tbody: ({ className, ...props }) => (
+    <tbody {...props} className={`divide-y ${className || ""}`} />
+  ),
+  tr: ({ className, ...props }) => (
     <tr
       {...props}
-      className="hover:opacity-70 transition-colors duration-150"
+      className={`hover:opacity-70 transition-colors duration-150 ${className || ""}`}
     />
   ),
-  th: ({ node, ...props }: any) => (
+  th: ({ className, ...props }) => (
     <th
       {...props}
-      className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b-2"
+      className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b-2 ${className || ""}`}
     />
   ),
-  td: ({ node, ...props }: any) => (
+  td: ({ className, ...props }) => (
     <td
       {...props}
-      className="px-4 py-3 text-xs whitespace-nowrap"
+      className={`px-4 py-3 text-xs whitespace-nowrap ${className || ""}`}
     />
   ),
 
-  // Responsive images
-  img: ({ node, ...props }: any) => (
+  // Responsive images with error handling
+  img: ({ src, alt, className, ...props }) => (
     <img
       {...props}
-      className="max-w-full h-auto rounded-lg shadow-sm my-2 mx-auto block border"
+      src={src}
+      alt={alt || "Image"}
+      loading="lazy"
+      className={`max-w-full h-auto rounded-lg shadow-sm my-0.5 mx-auto block border ${className || ""}`}
+      onError={(e) => {
+        // Fallback for broken images
+        const target = e.currentTarget;
+        target.style.display = "none";
+      }}
     />
   ),
 
   // Media elements
-  video: ({ node, ...props }: any) => (
+  video: ({ className, ...props }) => (
     <video
       {...props}
-      className="max-w-full h-auto rounded-lg shadow-sm my-2 mx-auto block"
+      className={`max-w-full h-auto rounded-lg shadow-sm my-0.5 mx-auto block ${className || ""}`}
       controls
+      preload="metadata"
     />
   ),
-  audio: ({ node, ...props }: any) => (
-    <audio {...props} className="w-full my-2" controls />
+  audio: ({ className, ...props }) => (
+    <audio
+      {...props}
+      className={`w-full my-0.5 ${className || ""}`}
+      controls
+      preload="metadata"
+    />
   ),
-};
+});
 
-export default function MarkdownRenderer({
-  content,
-  className = "",
-}: MarkdownRendererProps) {
+function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
+  // Memoize components to prevent recreation
+  const components = useMemo(() => createMarkdownComponents(), []);
+
   return (
     <div className={`prose prose-sm max-w-none ${className}`}>
-      <ReactMarkdown
-        components={markdownComponents}
-        remarkPlugins={[remarkGfm]}
-      >
+      <ReactMarkdown components={components} remarkPlugins={[remarkGfm]}>
         {content}
       </ReactMarkdown>
     </div>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(MarkdownRenderer);
